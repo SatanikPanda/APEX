@@ -26,6 +26,7 @@ export const OpticalInspectionHub: React.FC<OpticalInspectionHubProps> = ({
   isLoading,
 }) => {
   const [isCameraActive, setIsCameraActive] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
   const [filterSeverity, setFilterSeverity] = useState<'ALL' | 'CRITICAL' | 'MEDIUM' | 'LOW'>('ALL');
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -64,7 +65,8 @@ export const OpticalInspectionHub: React.FC<OpticalInspectionHubProps> = ({
       }
       setIsCameraActive(true);
     } catch (err) {
-      alert('Camera access unavailable. Please upload an image file instead.');
+      setCameraError('Camera access unavailable. Please upload an image file instead.');
+      setTimeout(() => setCameraError(null), 4000);
     }
   };
 
@@ -276,6 +278,13 @@ export const OpticalInspectionHub: React.FC<OpticalInspectionHubProps> = ({
             )}
           </div>
         </div>
+
+        {cameraError && (
+          <div className="mb-3 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs font-mono flex items-center justify-between">
+            <span>{cameraError}</span>
+            <button onClick={() => setCameraError(null)} className="text-amber-700 hover:text-amber-900 font-bold ml-2 cursor-pointer">×</button>
+          </div>
+        )}
 
         {/* Inspection Display Container */}
         <div className="relative rounded-xl overflow-hidden bg-stone-900 border border-[#eceae3] aspect-[16/9] min-h-[180px] max-h-[220px] flex items-center justify-center">

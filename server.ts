@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { GoogleGenAI, Type } from '@google/genai';
 
@@ -273,12 +274,20 @@ app.post('/api/diagnose', async (req, res) => {
   }
 });
 
+// Health check endpoint for container orchestrators (Cloud Run, K8s, Docker)
+app.get('/api/health', (_req, res) => {
+  res.status(200).json({ status: 'healthy', node: 'APEX-4.0', timestamp: new Date().toISOString() });
+});
+
 // Production or Vite development middleware
 async function startServer() {
-  if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, 'dist')));
+  const distPath = path.join(__dirname, 'dist');
+  const isProduction = process.env.NODE_ENV === 'production' || (fs.existsSync(distPath) && process.env.NODE_ENV !== 'development');
+
+  if (isProduction && fs.existsSync(distPath)) {
+    app.use(express.static(distPath));
     app.get('*', (_req, res) => {
-      res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+      res.sendFile(path.join(distPath, 'index.html'));
     });
   } else {
     const { createServer: createViteServer } = await import('vite');
@@ -290,7 +299,7 @@ async function startServer() {
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`[APEX 4.0] Industrial Diagnostics Node active on port ${PORT}`);
+    console.log(`[APEX 4.0] Industrial Diagnostics Node active on port ${PORT} [${isProduction ? 'PRODUCTION' : 'DEVELOPMENT'}]`);
   });
 }
 
