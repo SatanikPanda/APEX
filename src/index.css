@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Geist', system-ui, -apple-system, sans-serif;
+    background-color: #fbfaf7;
+    color: #1c1917;
+  }
+
+  .font-serif-display {
+    font-family: 'Newsreader', Georgia, serif;
+    letter-spacing: -0.015em;
+  }
+
+  .font-body {
+    font-family: 'Geist', system-ui, -apple-system, sans-serif;
+  }
+
+  code, pre, .font-mono {
+    font-family: 'Geist Mono', 'JetBrains Mono', monospace;
+    font-feature-settings: "tnum" 1, "zero" 1;
+  }
+}
+
+/* Warm Editorial Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #fbfaf7;
+}
+::-webkit-scrollbar-thumb {
+  background: #e2ded4;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #cac5b8;
+}

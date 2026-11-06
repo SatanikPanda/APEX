@@ -1,0 +1,6 @@
+{
+  "name": "APEX 4.0: Cyber-Physical Maintenance Copilot",
+  "description": "High-precision SCADA operations dashboard for autonomous factory diagnostics, root-cause correlation, technician SOP checklists, and downtime risk analysis.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
