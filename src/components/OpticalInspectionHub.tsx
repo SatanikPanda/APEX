@@ -154,6 +154,89 @@ export const OpticalInspectionHub: React.FC<OpticalInspectionHubProps> = ({
 
   const hasPresetImage = Boolean(currentPreset.previewImageUrl);
 
+  // 10mm x 10mm Calibration Grid (Graticule) Overlay for physical wear & tear reference
+  const render10mmGraticule = () => {
+    if (!showGraticule) return null;
+    return (
+      <div className="absolute inset-0 pointer-events-none z-10 select-none overflow-hidden">
+        <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            {/* 2mm Minor Subdivision Grid */}
+            <pattern id="grid-2mm" width="8" height="8" patternUnits="userSpaceOnUse">
+              <path d="M 8 0 L 0 0 0 8" fill="none" stroke="rgba(56, 189, 248, 0.12)" strokeWidth="0.5" />
+            </pattern>
+            {/* 10mm x 10mm Major Calibration Grid (40px x 40px) */}
+            <pattern id="grid-10mm" width="40" height="40" patternUnits="userSpaceOnUse">
+              <rect width="40" height="40" fill="url(#grid-2mm)" />
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(56, 189, 248, 0.42)" strokeWidth="1" />
+              {/* 5mm mid ticks along grid borders */}
+              <line x1="20" y1="0" x2="20" y2="4" stroke="rgba(56, 189, 248, 0.65)" strokeWidth="0.75" />
+              <line x1="0" y1="20" x2="4" y2="20" stroke="rgba(56, 189, 248, 0.65)" strokeWidth="0.75" />
+            </pattern>
+          </defs>
+
+          {/* 10mm x 10mm Grid Overlay */}
+          <rect width="100%" height="100%" fill="url(#grid-10mm)" />
+
+          {/* Millimeter Scale Coordinate Ticks on Top & Left Axes */}
+          <g className="font-mono text-[8px]" fill="#38bdf8" opacity="0.85">
+            {[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((mm, idx) => (
+              <g key={`x-${mm}`} transform={`translate(${idx * 40 + 16}, 12)`}>
+                <line x1="0" y1="-4" x2="0" y2="2" stroke="#38bdf8" strokeWidth="1" />
+                <text x="2" y="-1" fontSize="8" fill="#38bdf8">
+                  {mm}
+                </text>
+              </g>
+            ))}
+            {[0, 10, 20, 30, 40, 50].map((mm, idx) => (
+              <g key={`y-${mm}`} transform={`translate(12, ${idx * 40 + 24})`}>
+                <line x1="-4" y1="0" x2="2" y2="0" stroke="#38bdf8" strokeWidth="1" />
+                <text x="3" y="3" fontSize="8" fill="#38bdf8">
+                  {mm}
+                </text>
+              </g>
+            ))}
+          </g>
+
+          {/* Highlighted 10mm x 10mm Reference Cell */}
+          <g transform="translate(16, 24)">
+            <rect width="40" height="40" fill="rgba(56, 189, 248, 0.16)" stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="3,2" />
+            <text x="5" y="24" fontSize="9" fill="#ffffff" fontWeight="bold" fontFamily="monospace">10mm</text>
+          </g>
+        </svg>
+
+        {/* Optical Reticle Center Crosshair */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="w-16 h-16 border border-sky-400/40 rounded-full flex items-center justify-center">
+            <div className="w-2 h-2 bg-sky-400 rounded-full animate-ping opacity-75" />
+          </div>
+        </div>
+
+        {/* 10mm x 10mm Graticule Specifications Header Badge */}
+        <div className="absolute top-2.5 right-3 bg-black/80 backdrop-blur-xs px-2.5 py-1 rounded border border-sky-400/40 text-[9px] font-mono text-sky-300 flex items-center gap-2 shadow-xs z-20">
+          <div className="w-4 h-4 border border-sky-400 bg-sky-400/20 flex items-center justify-center text-[7px] text-sky-200 font-bold">
+            10
+          </div>
+          <div>
+            <div className="font-semibold text-white tracking-wide">10mm × 10mm CALIBRATION GRID</div>
+            <div className="text-sky-400/80 text-[8px]">PHYSICAL WEAR & TEAR SCALE (2mm TICKS)</div>
+          </div>
+        </div>
+
+        {/* Physical 10mm Scale Bar in Bottom Right */}
+        <div className="absolute bottom-2.5 right-3 bg-black/80 backdrop-blur-xs px-2.5 py-1 rounded border border-white/20 text-[9px] font-mono text-stone-200 flex items-center gap-2 shadow-xs z-20">
+          <div className="flex items-center gap-1">
+            <span className="text-sky-400 font-bold">|</span>
+            <div className="w-10 h-0.5 bg-sky-400"></div>
+            <span className="text-sky-400 font-bold">|</span>
+          </div>
+          <span className="font-semibold text-sky-300">10mm SCALE</span>
+          <span className="text-stone-400 text-[8px]">(±0.02mm)</span>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col gap-4">
       
@@ -319,7 +402,7 @@ export const OpticalInspectionHub: React.FC<OpticalInspectionHubProps> = ({
                 className={`p-1 rounded-full transition-colors cursor-pointer ${
                   showGraticule ? 'bg-stone-900 text-white' : 'hover:bg-stone-200/60 text-stone-600'
                 }`}
-                title="Toggle Calibration Graticule Grid"
+                title="Toggle 10mm x 10mm Calibration Grid (Graticule)"
               >
                 <Grid3X3 className="w-3.5 h-3.5" />
               </button>
@@ -401,7 +484,8 @@ export const OpticalInspectionHub: React.FC<OpticalInspectionHubProps> = ({
                 muted
                 className="w-full h-full object-cover max-h-[230px]"
               />
-              <div className="absolute top-3 left-3 bg-rose-600 text-white text-[10px] font-mono font-medium px-2.5 py-0.5 rounded-full shadow">
+              {render10mmGraticule()}
+              <div className="absolute top-3 left-3 bg-rose-600 text-white text-[10px] font-mono font-medium px-2.5 py-0.5 rounded-full shadow z-20">
                 LIVE OPTICAL FEED
               </div>
             </div>
@@ -413,7 +497,8 @@ export const OpticalInspectionHub: React.FC<OpticalInspectionHubProps> = ({
                 style={{ transform: `scale(${zoomLevel})` }}
                 className="max-h-[220px] max-w-full object-contain rounded transition-transform duration-200"
               />
-              <div className="absolute bottom-3 left-3 bg-white/95 border border-[#eceae3] text-stone-700 text-[10px] font-mono px-2.5 py-0.5 rounded-full shadow-2xs">
+              {render10mmGraticule()}
+              <div className="absolute bottom-3 left-3 bg-white/95 border border-[#eceae3] text-stone-700 text-[10px] font-mono px-2.5 py-0.5 rounded-full shadow-2xs z-20">
                 OPERATOR CAPTURE
               </div>
             </div>
@@ -427,32 +512,8 @@ export const OpticalInspectionHub: React.FC<OpticalInspectionHubProps> = ({
                 className="w-full h-full object-cover transition-transform duration-200"
               />
 
-              {/* Calibration Graticule Grid & Millimeter Scale Overlay */}
-              {showGraticule && (
-                <div className="absolute inset-0 pointer-events-none">
-                  {/* Subtle Grid Lines */}
-                  <div 
-                    className="absolute inset-0 opacity-20"
-                    style={{
-                      backgroundImage: 'linear-gradient(to right, #38bdf8 1px, transparent 1px), linear-gradient(to bottom, #38bdf8 1px, transparent 1px)',
-                      backgroundSize: '36px 36px'
-                    }}
-                  />
-                  {/* Optical Reticle Center Crosshair */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-16 h-16 border border-sky-400/40 rounded-full flex items-center justify-center">
-                      <div className="w-1.5 h-1.5 bg-sky-400 rounded-full animate-ping opacity-75" />
-                    </div>
-                  </div>
-                  {/* Corner Calibration Marks */}
-                  <div className="absolute top-2.5 left-3 text-[9px] font-mono text-sky-400/90 font-medium">
-                    RETICLE 100x · FOV: 45mm · RESOLUTION: 4K
-                  </div>
-                  <div className="absolute bottom-2.5 right-3 text-[9px] font-mono text-stone-300 bg-black/60 px-2 py-0.5 rounded border border-white/20">
-                    CALIBRATION: [|--- 25mm ---|]
-                  </div>
-                </div>
-              )}
+              {/* 10mm x 10mm Physical Calibration Grid (Graticule) Overlay */}
+              {render10mmGraticule()}
 
               {/* Defect Bounding Box & Hotspot Indicator */}
               {showBoundingBoxes && (
@@ -475,11 +536,14 @@ export const OpticalInspectionHub: React.FC<OpticalInspectionHubProps> = ({
             </div>
           ) : (
             /* Fallback CAD Reticle Schematic */
-            <IndustrialDiagram
-              type={currentPreset.diagramType}
-              temperatureC={telemetry.temperatureC}
-              vibrationRmsG={telemetry.vibrationRmsG}
-            />
+            <div className="relative w-full h-full flex items-center justify-center">
+              <IndustrialDiagram
+                type={currentPreset.diagramType}
+                temperatureC={telemetry.temperatureC}
+                vibrationRmsG={telemetry.vibrationRmsG}
+              />
+              {render10mmGraticule()}
+            </div>
           )}
         </div>
       </div>

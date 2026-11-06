@@ -15,7 +15,7 @@ export const PythonStreamlitModal: React.FC<PythonStreamlitModalProps> = ({
   if (!isOpen) return null;
 
   const pythonScriptCode = `"""
-APEX 4.0 // Autonomous Diagnostics Node
+APEX 4.0 · Autonomous Diagnostics Node
 Industry 4.0 Cyber-Physical Maintenance Copilot & Diagnostics Engineer
 SCADA / Siemens / Tesla Factory UI Operations Dashboard
 Powered by Industrial Neural Diagnostics Core
@@ -157,7 +157,7 @@ st.markdown("""
 # ----------------- Top Header Bar -----------------
 col_title, col_conn = st.columns([3, 1])
 with col_title:
-    st.markdown("### ⚡ APEX 4.0 // Autonomous Diagnostics Node")
+    st.markdown("### ⚡ APEX 4.0 · Autonomous Diagnostics Node")
     st.caption("Line 04 Automotive Robotics Assembly · Cyber-Physical Edge Triage Engine")
 with col_conn:
     st.markdown("""
@@ -308,8 +308,9 @@ with col_diag:
                         ]
                     }
 
+                    model_name = os.environ.get("DIAGNOSTICS_MODEL", "neural-fmea-v4")
                     response = client.models.generate_content(
-                        model='gemini-2.5-flash',
+                        model=model_name,
                         contents=prompt_content,
                         config=types.GenerateContentConfig(
                             system_instruction=system_instruction,
