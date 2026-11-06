@@ -110,7 +110,7 @@ export const DiagnosticsActionPlan: React.FC<DiagnosticsActionPlanProps> = ({
       
       {/* 1. Status Alert Header */}
       <div 
-        className={`border rounded-2xl p-4 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02)] transition-all ${
+        className={`border rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(28,25,23,0.04)] transition-all ${
           isCritical 
             ? 'bg-rose-50/80 border-rose-200 text-rose-950' 
             : isMedium 
@@ -143,7 +143,7 @@ export const DiagnosticsActionPlan: React.FC<DiagnosticsActionPlanProps> = ({
       </div>
 
       {/* 2. Asset Identification & Root Cause */}
-      <div className="bg-white border border-[#eceae3] rounded-2xl p-4 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+      <div className="bg-white border border-[#eceae3] rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(28,25,23,0.04)]">
         <div className="flex items-center justify-between mb-3.5 border-b border-[#eceae3] pb-2.5">
           <div className="flex items-center gap-2">
             <Cpu className="w-4 h-4 text-stone-700" />
@@ -177,7 +177,7 @@ export const DiagnosticsActionPlan: React.FC<DiagnosticsActionPlanProps> = ({
       </div>
 
       {/* 3. Interactive SOP Checklist */}
-      <div className="bg-white border border-[#eceae3] rounded-2xl p-4 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+      <div className="bg-white border border-[#eceae3] rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(28,25,23,0.04)]">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <Wrench className="w-4 h-4 text-stone-700" />
@@ -277,7 +277,7 @@ export const DiagnosticsActionPlan: React.FC<DiagnosticsActionPlanProps> = ({
       </div>
 
       {/* 4. Downtime & Cost Calculation */}
-      <div className="bg-white border border-[#eceae3] rounded-2xl p-4 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+      <div className="bg-white border border-[#eceae3] rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(28,25,23,0.04)]">
         <div className="flex items-center justify-between mb-3.5">
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-stone-700" />
@@ -341,7 +341,7 @@ export const DiagnosticsActionPlan: React.FC<DiagnosticsActionPlanProps> = ({
       </div>
 
       {/* 5. JSON Telemetry Logs & Export */}
-      <div className="bg-white border border-[#eceae3] rounded-2xl p-4 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+      <div className="bg-white border border-[#eceae3] rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(28,25,23,0.04)]">
         <div className="flex items-center justify-between">
           <button
             onClick={() => setIsJsonOpen(!isJsonOpen)}

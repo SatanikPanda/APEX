@@ -1,6 +1,10 @@
 import { AutomotivePreset } from '../types/industrial';
 
-export const AUTOMOTIVE_PRESETS: AutomotivePreset[] = [
+export interface EnhancedAutomotivePreset extends AutomotivePreset {
+  previewImageUrl?: string;
+}
+
+export const AUTOMOTIVE_PRESETS: EnhancedAutomotivePreset[] = [
   {
     id: 'spindle-z',
     title: 'High-Speed CNC Spindle Axis Z',
@@ -9,6 +13,7 @@ export const AUTOMOTIVE_PRESETS: AutomotivePreset[] = [
     errorCode: 'E-301: Spindle Bearing Over-Temperature & High Vibration',
     defaultSeverity: 'CRITICAL',
     diagramType: 'spindle',
+    previewImageUrl: '/assets/aistudio/image_376ca200.png',
     telemetry: {
       errorCode: 'E-301',
       temperatureC: 88.5,
@@ -43,6 +48,7 @@ export const AUTOMOTIVE_PRESETS: AutomotivePreset[] = [
     errorCode: 'E-409: Harmonic Drive Backlash & Axis Position Drift',
     defaultSeverity: 'CRITICAL',
     diagramType: 'robot_joint',
+    previewImageUrl: '/assets/aistudio/image_b7d29a6b.png',
     telemetry: {
       errorCode: 'E-409',
       temperatureC: 72.0,
@@ -58,7 +64,7 @@ export const AUTOMOTIVE_PRESETS: AutomotivePreset[] = [
       root_cause_analysis: 'Cyclic torsional shock loads during rapid 1.8-second spot-weld repositioning cycles exceeded flexspline endurance limit, accelerated by degraded synthetic molybdenum grease.',
       remediation_sop: [
         'Pause framing cell automation sequence and lock safety perimeter interlock gates.',
-        'Zero-gravity jog robot arm to maintenance maintenance posture and insert mechanical locking pins.',
+        'Zero-gravity jog robot arm to maintenance posture and insert mechanical locking pins.',
         'Perform electrical LOTO on Robot Controller Cabinet RC-07.',
         'Mount dial test indicator to measure angular backlash on Joint 4 output flange (> 0.08° confirms gear tooth failure).',
         'Drain and inspect gearbox grease for metallic magnetic slurry.',
@@ -77,6 +83,7 @@ export const AUTOMOTIVE_PRESETS: AutomotivePreset[] = [
     errorCode: 'E-718: Proportional Directional Valve Pressure Drop',
     defaultSeverity: 'MEDIUM',
     diagramType: 'hydraulic',
+    previewImageUrl: '/assets/aistudio/image_cb915aab.png',
     telemetry: {
       errorCode: 'E-718',
       temperatureC: 64.2,

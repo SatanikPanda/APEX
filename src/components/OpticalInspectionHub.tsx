@@ -1,12 +1,26 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Camera, Upload, RefreshCw, Sparkles, Thermometer, Radio, Activity } from 'lucide-react';
-import { AutomotivePreset, TelemetryLogData } from '../types/industrial';
-import { AUTOMOTIVE_PRESETS } from '../data/automotivePresets';
+import { 
+  Camera, 
+  Upload, 
+  RefreshCw, 
+  Sparkles, 
+  Thermometer, 
+  Radio, 
+  Activity, 
+  ZoomIn, 
+  ZoomOut, 
+  Crosshair, 
+  Scan, 
+  Grid3X3,
+  Sliders
+} from 'lucide-react';
+import { TelemetryLogData } from '../types/industrial';
+import { AUTOMOTIVE_PRESETS, EnhancedAutomotivePreset } from '../data/automotivePresets';
 import { IndustrialDiagram } from './IndustrialDiagram';
 
 interface OpticalInspectionHubProps {
-  currentPreset: AutomotivePreset;
-  onSelectPreset: (preset: AutomotivePreset) => void;
+  currentPreset: EnhancedAutomotivePreset;
+  onSelectPreset: (preset: EnhancedAutomotivePreset) => void;
   telemetry: TelemetryLogData;
   setTelemetry: React.Dispatch<React.SetStateAction<TelemetryLogData>>;
   customImageBase64: string | null;
@@ -28,6 +42,13 @@ export const OpticalInspectionHub: React.FC<OpticalInspectionHubProps> = ({
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [filterSeverity, setFilterSeverity] = useState<'ALL' | 'CRITICAL' | 'MEDIUM' | 'LOW'>('ALL');
+  const [viewMode, setViewMode] = useState<'PHOTO' | 'SCHEMATIC'>('PHOTO');
+
+  // Inspection Tools State
+  const [zoomLevel, setZoomLevel] = useState<number>(1);
+  const [showBoundingBoxes, setShowBoundingBoxes] = useState<boolean>(true);
+  const [showGraticule, setShowGraticule] = useState<boolean>(true);
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -64,7 +85,7 @@ export const OpticalInspectionHub: React.FC<OpticalInspectionHubProps> = ({
         videoRef.current.play();
       }
       setIsCameraActive(true);
-    } catch (err) {
+    } catch {
       setCameraError('Camera access unavailable. Please upload an image file instead.');
       setTimeout(() => setCameraError(null), 4000);
     }
@@ -117,13 +138,11 @@ export const OpticalInspectionHub: React.FC<OpticalInspectionHubProps> = ({
     });
   };
 
-  // Filter presets by severity
   const filteredPresets = AUTOMOTIVE_PRESETS.filter((p) => {
     if (filterSeverity === 'ALL') return true;
     return p.defaultSeverity === filterSeverity;
   });
 
-  // Dynamic SVG waveform points for FFT oscilloscope
   const amplitude = Math.min(28, Math.max(4, telemetry.vibrationRmsG * 5.5));
   const frequency = telemetry.vibrationRmsG > 2.5 ? 4 : 2;
   const fftPoints = Array.from({ length: 32 }, (_, i) => {
@@ -133,11 +152,13 @@ export const OpticalInspectionHub: React.FC<OpticalInspectionHubProps> = ({
     return `${x},${Math.max(4, Math.min(40, y))}`;
   }).join(' ');
 
+  const hasPresetImage = Boolean(currentPreset.previewImageUrl);
+
   return (
     <div className="flex flex-col gap-4">
       
       {/* 1. Failure Mode Preset Selector with Severity Filter */}
-      <div className="bg-white border border-[#eceae3] rounded-2xl p-4 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+      <div className="bg-white border border-[#eceae3] rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(28,25,23,0.04)]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3.5">
           <div>
             <h3 className="font-serif-display text-base font-semibold text-stone-900">
@@ -182,6 +203,7 @@ export const OpticalInspectionHub: React.FC<OpticalInspectionHubProps> = ({
                 onClick={() => {
                   setCustomImageBase64(null);
                   stopCamera();
+                  setZoomLevel(1);
                   onSelectPreset(preset);
                 }}
                 className={`flex flex-col text-left p-3 rounded-xl border transition-all text-xs cursor-pointer ${
@@ -221,18 +243,88 @@ export const OpticalInspectionHub: React.FC<OpticalInspectionHubProps> = ({
       </div>
 
       {/* 2. Optical Inspection Display */}
-      <div className="bg-white border border-[#eceae3] rounded-2xl p-4 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <h3 className="font-serif-display text-base font-semibold text-stone-900">
-              Optical Inspection Zone
-            </h3>
-            <span className="text-[11px] font-mono text-stone-500">
-              {customImageBase64 ? 'External Optical Feed' : currentPreset.title}
-            </span>
+      <div className="bg-white border border-[#eceae3] rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(28,25,23,0.04)]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3">
+          <div className="flex items-center gap-3">
+            <div>
+              <h3 className="font-serif-display text-base font-semibold text-stone-900">
+                Optical Inspection Zone
+              </h3>
+              <span className="text-[11px] font-mono text-stone-500">
+                {customImageBase64 ? 'External Optical Feed' : currentPreset.title}
+              </span>
+            </div>
+
+            {/* Toggle View Mode (Real Photo vs CAD Schematic) */}
+            {hasPresetImage && !customImageBase64 && !isCameraActive && (
+              <div className="flex items-center bg-[#f4f2eb] p-0.5 rounded-full border border-[#eceae3] text-[10px] font-mono">
+                <button
+                  onClick={() => setViewMode('PHOTO')}
+                  className={`px-2.5 py-0.5 rounded-full font-medium transition-all cursor-pointer ${
+                    viewMode === 'PHOTO'
+                      ? 'bg-white text-stone-900 shadow-2xs'
+                      : 'text-stone-500 hover:text-stone-900'
+                  }`}
+                >
+                  Optical Capture
+                </button>
+                <button
+                  onClick={() => setViewMode('SCHEMATIC')}
+                  className={`px-2.5 py-0.5 rounded-full font-medium transition-all cursor-pointer ${
+                    viewMode === 'SCHEMATIC'
+                      ? 'bg-white text-stone-900 shadow-2xs'
+                      : 'text-stone-500 hover:text-stone-900'
+                  }`}
+                >
+                  CAD Reticle
+                </button>
+              </div>
+            )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            {/* Real Inspection Tools: Zoom & Overlay Toggles */}
+            <div className="flex items-center bg-[#faf9f5] border border-[#eceae3] rounded-full p-0.5 text-stone-600">
+              <button
+                onClick={() => setZoomLevel((z) => Math.max(1, Number((z - 0.25).toFixed(2))))}
+                disabled={zoomLevel <= 1}
+                className="p-1 rounded-full hover:bg-stone-200/60 disabled:opacity-30 cursor-pointer"
+                title="Zoom Out"
+              >
+                <ZoomOut className="w-3.5 h-3.5" />
+              </button>
+              <span className="text-[10px] font-mono font-medium px-1.5 tabular-nums text-stone-700">
+                {zoomLevel}x
+              </span>
+              <button
+                onClick={() => setZoomLevel((z) => Math.min(2.5, Number((z + 0.25).toFixed(2))))}
+                disabled={zoomLevel >= 2.5}
+                className="p-1 rounded-full hover:bg-stone-200/60 disabled:opacity-30 cursor-pointer"
+                title="Zoom In"
+              >
+                <ZoomIn className="w-3.5 h-3.5" />
+              </button>
+              <span className="text-stone-300 mx-0.5">|</span>
+              <button
+                onClick={() => setShowBoundingBoxes((b) => !b)}
+                className={`p-1 rounded-full transition-colors cursor-pointer ${
+                  showBoundingBoxes ? 'bg-stone-900 text-white' : 'hover:bg-stone-200/60 text-stone-600'
+                }`}
+                title="Toggle Defect Bounding Box"
+              >
+                <Scan className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => setShowGraticule((g) => !g)}
+                className={`p-1 rounded-full transition-colors cursor-pointer ${
+                  showGraticule ? 'bg-stone-900 text-white' : 'hover:bg-stone-200/60 text-stone-600'
+                }`}
+                title="Toggle Calibration Graticule Grid"
+              >
+                <Grid3X3 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
             <input
               type="file"
               ref={fileInputRef}
@@ -245,7 +337,7 @@ export const OpticalInspectionHub: React.FC<OpticalInspectionHubProps> = ({
               className="flex items-center gap-1.5 px-3 py-1 text-xs font-mono font-medium text-stone-700 bg-white hover:bg-stone-50 rounded-full border border-[#eceae3] transition-colors shadow-2xs cursor-pointer"
             >
               <Upload className="w-3.5 h-3.5 text-stone-500" />
-              <span>Upload Photo</span>
+              <span>Upload</span>
             </button>
             {!isCameraActive ? (
               <button
@@ -261,7 +353,7 @@ export const OpticalInspectionHub: React.FC<OpticalInspectionHubProps> = ({
                 className="flex items-center gap-1.5 px-3 py-1 text-xs font-mono font-medium text-white bg-rose-600 hover:bg-rose-700 rounded-full border border-rose-700 transition-colors shadow-2xs cursor-pointer"
               >
                 <Camera className="w-3.5 h-3.5" />
-                <span>Capture Snapshot</span>
+                <span>Snap</span>
               </button>
             )}
             {customImageBase64 && (
@@ -271,7 +363,7 @@ export const OpticalInspectionHub: React.FC<OpticalInspectionHubProps> = ({
                   stopCamera();
                 }}
                 className="p-1.5 text-stone-500 hover:text-stone-800 rounded-full border border-[#eceae3] cursor-pointer"
-                title="Reset to schematic"
+                title="Reset to default preset capture"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
               </button>
@@ -287,7 +379,7 @@ export const OpticalInspectionHub: React.FC<OpticalInspectionHubProps> = ({
         )}
 
         {/* Inspection Display Container */}
-        <div className="relative rounded-xl overflow-hidden bg-stone-900 border border-[#eceae3] aspect-[16/9] min-h-[180px] max-h-[220px] flex items-center justify-center">
+        <div className="relative rounded-xl overflow-hidden bg-[#141210] border border-[#eceae3] aspect-[16/9] min-h-[190px] max-h-[230px] flex items-center justify-center select-none">
           {isLoading && (
             <div className="absolute inset-0 z-30 bg-white/95 backdrop-blur-xs flex flex-col items-center justify-center">
               <div className="w-7 h-7 border-2 border-stone-800 border-t-transparent rounded-full animate-spin mb-2" />
@@ -307,24 +399,82 @@ export const OpticalInspectionHub: React.FC<OpticalInspectionHubProps> = ({
                 autoPlay
                 playsInline
                 muted
-                className="w-full h-full object-cover max-h-[220px]"
+                className="w-full h-full object-cover max-h-[230px]"
               />
               <div className="absolute top-3 left-3 bg-rose-600 text-white text-[10px] font-mono font-medium px-2.5 py-0.5 rounded-full shadow">
                 LIVE OPTICAL FEED
               </div>
             </div>
           ) : customImageBase64 ? (
-            <div className="relative w-full h-full flex items-center justify-center p-2 bg-[#faf9f5]">
+            <div className="relative w-full h-full flex items-center justify-center p-2 bg-[#faf9f5] overflow-hidden">
               <img
                 src={customImageBase64}
                 alt="Optical component inspection capture"
-                className="max-h-[210px] max-w-full object-contain rounded"
+                style={{ transform: `scale(${zoomLevel})` }}
+                className="max-h-[220px] max-w-full object-contain rounded transition-transform duration-200"
               />
               <div className="absolute bottom-3 left-3 bg-white/95 border border-[#eceae3] text-stone-700 text-[10px] font-mono px-2.5 py-0.5 rounded-full shadow-2xs">
                 OPERATOR CAPTURE
               </div>
             </div>
+          ) : viewMode === 'PHOTO' && currentPreset.previewImageUrl ? (
+            /* Photorealistic Industrial Optical Component Capture */
+            <div className="relative w-full h-full flex items-center justify-center bg-black/90 overflow-hidden">
+              <img
+                src={currentPreset.previewImageUrl}
+                alt={currentPreset.title}
+                style={{ transform: `scale(${zoomLevel})` }}
+                className="w-full h-full object-cover transition-transform duration-200"
+              />
+
+              {/* Calibration Graticule Grid & Millimeter Scale Overlay */}
+              {showGraticule && (
+                <div className="absolute inset-0 pointer-events-none">
+                  {/* Subtle Grid Lines */}
+                  <div 
+                    className="absolute inset-0 opacity-20"
+                    style={{
+                      backgroundImage: 'linear-gradient(to right, #38bdf8 1px, transparent 1px), linear-gradient(to bottom, #38bdf8 1px, transparent 1px)',
+                      backgroundSize: '36px 36px'
+                    }}
+                  />
+                  {/* Optical Reticle Center Crosshair */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-16 h-16 border border-sky-400/40 rounded-full flex items-center justify-center">
+                      <div className="w-1.5 h-1.5 bg-sky-400 rounded-full animate-ping opacity-75" />
+                    </div>
+                  </div>
+                  {/* Corner Calibration Marks */}
+                  <div className="absolute top-2.5 left-3 text-[9px] font-mono text-sky-400/90 font-medium">
+                    RETICLE 100x · FOV: 45mm · RESOLUTION: 4K
+                  </div>
+                  <div className="absolute bottom-2.5 right-3 text-[9px] font-mono text-stone-300 bg-black/60 px-2 py-0.5 rounded border border-white/20">
+                    CALIBRATION: [|--- 25mm ---|]
+                  </div>
+                </div>
+              )}
+
+              {/* Defect Bounding Box & Hotspot Indicator */}
+              {showBoundingBoxes && (
+                <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                  <div className="relative w-44 h-28 border-2 border-rose-500/80 bg-rose-500/10 rounded-md animate-pulse">
+                    <div className="absolute -top-3.5 left-2 bg-rose-600 text-white text-[9px] font-mono font-bold px-1.5 py-0.2 rounded tracking-wide shadow-xs whitespace-nowrap">
+                      FAULT LOCALIZATION: {telemetry.temperatureC}°C
+                    </div>
+                    <div className="absolute -bottom-3 right-2 text-[9px] font-mono text-rose-300 bg-black/70 px-1 rounded">
+                      DEV: +{(telemetry.vibrationRmsG * 0.12).toFixed(2)}mm
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Watermark Tag */}
+              <div className="absolute bottom-2.5 left-3 bg-black/70 backdrop-blur-xs border border-white/20 text-white text-[9px] font-mono px-2 py-0.5 rounded-full shadow-xs">
+                OPTICAL FEED: {currentPreset.subsystem.slice(0, 24)}...
+              </div>
+            </div>
           ) : (
+            /* Fallback CAD Reticle Schematic */
             <IndustrialDiagram
               type={currentPreset.diagramType}
               temperatureC={telemetry.temperatureC}
@@ -335,7 +485,7 @@ export const OpticalInspectionHub: React.FC<OpticalInspectionHubProps> = ({
       </div>
 
       {/* 3. Sensor Ingestion & Sliders with Acoustic FFT Visualizer */}
-      <div className="bg-white border border-[#eceae3] rounded-2xl p-4 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+      <div className="bg-white border border-[#eceae3] rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(28,25,23,0.04)]">
         <div className="flex items-center justify-between mb-3.5">
           <h3 className="font-serif-display text-base font-semibold text-stone-900">
             Live Telemetry Adjustments

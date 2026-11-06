@@ -4,7 +4,7 @@ import { KPIRibbon } from './components/KPIRibbon';
 import { OpticalInspectionHub } from './components/OpticalInspectionHub';
 import { DiagnosticsActionPlan } from './components/DiagnosticsActionPlan';
 import { PythonStreamlitModal } from './components/PythonStreamlitModal';
-import { AUTOMOTIVE_PRESETS } from './data/automotivePresets';
+import { AUTOMOTIVE_PRESETS, EnhancedAutomotivePreset } from './data/automotivePresets';
 import { AUTOMOTIVE_WORKCELLS } from './data/workcells';
 import { AutomotivePreset, DiagnosticReport, SOPStepStatus, TelemetryLogData, WorkOrderRecord } from './types/industrial';
 import { Wrench, Terminal, ShieldAlert, CheckCircle2 } from 'lucide-react';
@@ -14,9 +14,10 @@ export default function App() {
   const [isPythonModalOpen, setIsPythonModalOpen] = useState(false);
   const [isEmergencyStopped, setIsEmergencyStopped] = useState(false);
   const [eStopNotice, setEStopNotice] = useState<string | null>(null);
+  const [workcellFilter, setWorkcellFilter] = useState<'ALL' | 'NOMINAL' | 'WARNING' | 'CRITICAL'>('ALL');
 
   // Core Inspection State
-  const [currentPreset, setCurrentPreset] = useState<AutomotivePreset>(AUTOMOTIVE_PRESETS[0]);
+  const [currentPreset, setCurrentPreset] = useState<EnhancedAutomotivePreset>(AUTOMOTIVE_PRESETS[0]);
   const [telemetry, setTelemetry] = useState<TelemetryLogData>(AUTOMOTIVE_PRESETS[0].telemetry);
   const [customImageBase64, setCustomImageBase64] = useState<string | null>(null);
   const [report, setReport] = useState<DiagnosticReport>(AUTOMOTIVE_PRESETS[0].groundTruth);
@@ -55,7 +56,7 @@ export default function App() {
   const [hourlyLineRate, setHourlyLineRate] = useState(1850);
 
   // Preset Selection
-  const handleSelectPreset = (preset: AutomotivePreset) => {
+  const handleSelectPreset = (preset: EnhancedAutomotivePreset) => {
     setCurrentPreset(preset);
     setTelemetry(preset.telemetry);
     setCustomImageBase64(null);
@@ -84,7 +85,7 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           imageBase64: customImageBase64 || undefined,
-          telemetryLog: `Error Code: ${telemetry.errorCode} | Temp: ${telemetry.temperatureC}C | Vibration: ${telemetry.vibrationRmsG}g | Notes: ${telemetry.notes}`,
+          telemetryLog: `Error Code: ${telemetry.errorCode} | Temp: ${telemetry.temperatureC}°C | Vibration: ${telemetry.vibrationRmsG}g | Notes: ${telemetry.notes}`,
           equipmentHint: currentPreset.title,
         }),
       });
@@ -216,8 +217,8 @@ export default function App() {
 
         {/* Tab 2: Workcells Fleet */}
         {activeTab === 'workcells' && (
-          <div className="bg-white border border-[#eceae3] rounded-2xl p-5 sm:p-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-            <div className="flex items-center justify-between mb-4 border-b border-[#eceae3] pb-3">
+          <div className="bg-white border border-[#eceae3] rounded-2xl p-5 sm:p-6 shadow-[0_2px_8px_rgba(28,25,23,0.04)]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 border-b border-[#eceae3] pb-3">
               <div>
                 <h2 className="font-serif-display text-lg font-semibold text-stone-900">
                   Line 04 Automotive Fleet Topology (12 Cells Monitored)
@@ -226,15 +227,33 @@ export default function App() {
                   OPC-UA Synchronous Node Heartbeat | Protocol: IEC 62541
                 </p>
               </div>
-              <div className="flex items-center gap-2 text-xs font-mono">
-                <span className="text-emerald-800 font-medium bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">9 Nominal</span>
-                <span className="text-amber-900 font-medium bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">1 Warning</span>
-                <span className="text-rose-800 font-medium bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200">2 Critical</span>
+              <div className="flex items-center gap-2 self-start sm:self-auto">
+                {/* Interactive Status Filter */}
+                <div className="flex items-center bg-[#f4f2eb] p-0.5 rounded-full border border-[#eceae3] text-[10px] font-mono">
+                  {(['ALL', 'NOMINAL', 'WARNING', 'CRITICAL'] as const).map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => setWorkcellFilter(status)}
+                      className={`px-2.5 py-0.5 rounded-full font-medium transition-all cursor-pointer ${
+                        workcellFilter === status
+                          ? 'bg-white text-stone-900 shadow-2xs border border-[#e8e5dc]'
+                          : 'text-stone-500 hover:text-stone-900'
+                      }`}
+                    >
+                      {status}
+                    </button>
+                  ))}
+                </div>
+                <div className="hidden md:flex items-center gap-1.5 text-xs font-mono">
+                  <span className="text-emerald-800 font-medium bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 text-[10px]">9 Nominal</span>
+                  <span className="text-amber-900 font-medium bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 text-[10px]">1 Warning</span>
+                  <span className="text-rose-800 font-medium bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200 text-[10px]">2 Critical</span>
+                </div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
-              {AUTOMOTIVE_WORKCELLS.map((cell) => {
+              {AUTOMOTIVE_WORKCELLS.filter((cell) => workcellFilter === 'ALL' || cell.status === workcellFilter).map((cell) => {
                 const isCrit = cell.status === 'CRITICAL';
                 const isWarn = cell.status === 'WARNING';
                 return (
@@ -310,7 +329,7 @@ export default function App() {
 
         {/* Tab 3: SOP Workbench */}
         {activeTab === 'sop' && (
-          <div className="bg-white border border-[#eceae3] rounded-2xl p-5 sm:p-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+          <div className="bg-white border border-[#eceae3] rounded-2xl p-5 sm:p-6 shadow-[0_2px_8px_rgba(28,25,23,0.04)]">
             <div className="flex items-center justify-between mb-4 border-b border-[#eceae3] pb-3">
               <div>
                 <h2 className="font-serif-display text-lg font-semibold text-stone-900 flex items-center gap-2">
@@ -364,7 +383,7 @@ export default function App() {
 
         {/* Tab 4: Work Orders Queue */}
         {activeTab === 'orders' && (
-          <div className="bg-white border border-[#eceae3] rounded-2xl p-5 sm:p-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+          <div className="bg-white border border-[#eceae3] rounded-2xl p-5 sm:p-6 shadow-[0_2px_8px_rgba(28,25,23,0.04)]">
             <div className="flex items-center justify-between mb-4 border-b border-[#eceae3] pb-3">
               <div>
                 <h2 className="font-serif-display text-lg font-semibold text-stone-900">
@@ -436,7 +455,7 @@ export default function App() {
 
         {/* Tab 5: Analytics */}
         {activeTab === 'analytics' && (
-          <div className="bg-white border border-[#eceae3] rounded-2xl p-5 sm:p-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+          <div className="bg-white border border-[#eceae3] rounded-2xl p-5 sm:p-6 shadow-[0_2px_8px_rgba(28,25,23,0.04)]">
             <h2 className="font-serif-display text-lg font-semibold text-stone-900 mb-4 pb-2 border-b border-[#eceae3]">
               Financial Risk Assessment and Exposure Models
             </h2>
@@ -494,7 +513,7 @@ export default function App() {
 
         {/* Tab 6: Raw JSON Logs */}
         {activeTab === 'logs' && (
-          <div className="bg-white border border-[#eceae3] rounded-2xl p-5 sm:p-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+          <div className="bg-white border border-[#eceae3] rounded-2xl p-5 sm:p-6 shadow-[0_2px_8px_rgba(28,25,23,0.04)]">
             <h2 className="font-serif-display text-lg font-semibold text-stone-900 mb-4 pb-2 border-b border-[#eceae3] flex items-center gap-2">
               <Terminal className="w-4 h-4 text-stone-700" />
               <span>Real-Time Ingestion and Inference Log Feed</span>

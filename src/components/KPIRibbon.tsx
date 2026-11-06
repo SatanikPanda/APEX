@@ -24,7 +24,7 @@ export const KPIRibbon: React.FC<KPIRibbonProps> = ({
     <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 mb-4">
       
       {/* 1. Active Workcells */}
-      <div className="bg-white border border-[#eceae3] rounded-2xl p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:border-[#dfdbd0] transition-colors">
+      <div className="bg-white border border-[#eceae3] rounded-2xl p-3.5 shadow-[0_2px_8px_rgba(28,25,23,0.04)] hover:border-[#dfdbd0] transition-colors">
         <div className="flex items-center justify-between text-stone-500 mb-1">
           <span className="text-[10px] font-mono font-medium uppercase tracking-wider">Active Fleet</span>
           <Layers className="w-3.5 h-3.5 text-stone-400" />
@@ -39,7 +39,7 @@ export const KPIRibbon: React.FC<KPIRibbonProps> = ({
       </div>
 
       {/* 2. Total Scans */}
-      <div className="bg-white border border-[#eceae3] rounded-2xl p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:border-[#dfdbd0] transition-colors">
+      <div className="bg-white border border-[#eceae3] rounded-2xl p-3.5 shadow-[0_2px_8px_rgba(28,25,23,0.04)] hover:border-[#dfdbd0] transition-colors">
         <div className="flex items-center justify-between text-stone-500 mb-1">
           <span className="text-[10px] font-mono font-medium uppercase tracking-wider">Scans Ingested</span>
           <Activity className="w-3.5 h-3.5 text-stone-400" />
@@ -53,7 +53,7 @@ export const KPIRibbon: React.FC<KPIRibbonProps> = ({
       </div>
 
       {/* 3. Active Faults */}
-      <div className="bg-white border border-[#eceae3] rounded-2xl p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:border-[#dfdbd0] transition-colors">
+      <div className="bg-white border border-[#eceae3] rounded-2xl p-3.5 shadow-[0_2px_8px_rgba(28,25,23,0.04)] hover:border-[#dfdbd0] transition-colors">
         <div className="flex items-center justify-between text-stone-500 mb-1">
           <span className="text-[10px] font-mono font-medium uppercase tracking-wider">Faults Flagged</span>
           <AlertTriangle className={`w-3.5 h-3.5 ${activeFaults > 0 ? 'text-amber-500' : 'text-stone-400'}`} />
@@ -67,7 +67,7 @@ export const KPIRibbon: React.FC<KPIRibbonProps> = ({
       </div>
 
       {/* 4. Inference Speed (MTTD) */}
-      <div className="bg-white border border-[#eceae3] rounded-2xl p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:border-[#dfdbd0] transition-colors">
+      <div className="bg-white border border-[#eceae3] rounded-2xl p-3.5 shadow-[0_2px_8px_rgba(28,25,23,0.04)] hover:border-[#dfdbd0] transition-colors">
         <div className="flex items-center justify-between text-stone-500 mb-1">
           <span className="text-[10px] font-mono font-medium uppercase tracking-wider">Diagnostics MTTD</span>
           <Zap className="w-3.5 h-3.5 text-amber-500" />
@@ -81,7 +81,7 @@ export const KPIRibbon: React.FC<KPIRibbonProps> = ({
       </div>
 
       {/* 5. Safety Incidents */}
-      <div className="bg-white border border-[#eceae3] rounded-2xl p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:border-[#dfdbd0] transition-colors">
+      <div className="bg-white border border-[#eceae3] rounded-2xl p-3.5 shadow-[0_2px_8px_rgba(28,25,23,0.04)] hover:border-[#dfdbd0] transition-colors">
         <div className="flex items-center justify-between text-stone-500 mb-1">
           <span className="text-[10px] font-mono font-medium uppercase tracking-wider">Safety Status</span>
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
@@ -95,7 +95,7 @@ export const KPIRibbon: React.FC<KPIRibbonProps> = ({
       </div>
 
       {/* 6. Loss Risk Exposure */}
-      <div className="bg-white border border-[#eceae3] rounded-2xl p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:border-[#dfdbd0] transition-colors">
+      <div className="bg-white border border-[#eceae3] rounded-2xl p-3.5 shadow-[0_2px_8px_rgba(28,25,23,0.04)] hover:border-[#dfdbd0] transition-colors">
         <div className="flex items-center justify-between text-stone-500 mb-1">
           <span className="text-[10px] font-mono font-medium uppercase tracking-wider">Cost Exposure</span>
           <DollarSign className="w-3.5 h-3.5 text-rose-500" />

@@ -31,6 +31,7 @@ export interface AutomotivePreset {
   defaultSeverity: SeverityLevel;
   telemetry: TelemetryLogData;
   diagramType: 'spindle' | 'robot_joint' | 'hydraulic' | 'smt_circuit' | 'weld_tip';
+  previewImageUrl?: string;
   groundTruth: DiagnosticReport;
 }
 
